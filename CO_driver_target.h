@@ -41,7 +41,8 @@
 #ifndef CO_SINGLE_THREAD
 #include <pthread.h>
 #endif
-#include <linux/can.h>
+#include <nuttx/can.h>
+#include <netpacket/can.h>
 #include <net/if.h>
 #include <sys/epoll.h>
 

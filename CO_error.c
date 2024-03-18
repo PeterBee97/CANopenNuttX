@@ -29,7 +29,6 @@
 #include <stdbool.h>
 #include <syslog.h>
 #include <time.h>
-#include <linux/can/error.h>
 
 #include "CO_error.h"
 #include "301/CO_driver.h"
@@ -55,7 +54,7 @@ static CO_CANinterfaceState_t CO_CANerrorSetListenOnly(
                                            "&",
                                            CANerrorhandler->ifName,
                                            CANerrorhandler->ifName);
-        ret = system(command);
+        ret = 0;//system(command);
         if(ret < 0){
             log_printf(LOG_DEBUG, DBG_ERRNO, "system()");
         }

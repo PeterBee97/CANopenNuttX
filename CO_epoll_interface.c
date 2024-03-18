@@ -35,6 +35,7 @@
 #include <syslog.h>
 #include <time.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #if (CO_CONFIG_GTW) & CO_CONFIG_GTW_ASCII
 #include <stdio.h>

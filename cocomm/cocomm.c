@@ -26,15 +26,16 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <bits/getopt_core.h>
 #include <string.h>
 #include <netdb.h>
 #include <limits.h>
 #include <net/if.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <linux/can.h>
+#include <nuttx/can.h>
+#include <netpacket/can.h>
 #include <signal.h>
 
 #ifndef BUF_SIZE

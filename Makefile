@@ -1,79 +1,75 @@
-# Makefile for CANopenNode with Linux socketCAN (with commander functionalities)
+############################################################################
+# apps/canutils/canopennode/Makefile
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+###########################################################################
 
+# Standard includes
 
-DRV_SRC = .
-CANOPEN_SRC = CANopenNode
-APPL_SRC = CANopenNode/example
+include $(APPDIR)/Make.defs
 
+CSRCS += CO_driver.c
+CSRCS += CO_error.c
+CSRCS += CO_epoll_interface.c
+CSRCS += CO_storageLinux.c
+CSRCS += CANopenNode/301/CO_ODinterface.c
+CSRCS += CANopenNode/301/CO_NMT_Heartbeat.c
+CSRCS += CANopenNode/301/CO_HBconsumer.c
+CSRCS += CANopenNode/301/CO_Emergency.c
+CSRCS += CANopenNode/301/CO_SDOserver.c
+CSRCS += CANopenNode/301/CO_SDOclient.c
+CSRCS += CANopenNode/301/CO_TIME.c
+CSRCS += CANopenNode/301/CO_SYNC.c
+CSRCS += CANopenNode/301/CO_PDO.c
+CSRCS += CANopenNode/301/crc16-ccitt.c
+CSRCS += CANopenNode/301/CO_fifo.c
+CSRCS += CANopenNode/303/CO_LEDs.c
+CSRCS += CANopenNode/304/CO_GFC.c
+CSRCS += CANopenNode/304/CO_SRDO.c
+CSRCS += CANopenNode/305/CO_LSSslave.c
+CSRCS += CANopenNode/305/CO_LSSmaster.c
+CSRCS += CANopenNode/309/CO_gateway_ascii.c
+CSRCS += CANopenNode/storage/CO_storage.c
+CSRCS += CANopenNode/extra/CO_trace.c
+CSRCS += CANopenNode/CANopen.c
+CSRCS += CANopenNode/example/OD.c
 
-LINK_TARGET = canopend
+CFLAGS += ${INCDIR_PREFIX}. ${INCDIR_PREFIX}CANopenNode ${INCDIR_PREFIX}CANopenNode/example
+CFLAGS += -Wno-shadow -Wno-undef
+CFLAGS += -DCO_CONFIG_STORAGE=0 -DCO_CONFIG_GTW=0x1FF
+CFLAGS += -DCO_CONFIG_GTWA_COMM_BUF_SIZE=100 -DCO_CONFIG_GTWA_LOG_BUF_SIZE=1000 -DCO_CONFIG_GTW_BLOCK_DL_LOOP=3
+CFLAGS += -DCO_CONFIG_GTW_NET_MIN=0 -DCO_CONFIG_GTW_NET_MAX=0xFFFF
 
+MODULE = $(CONFIG_CANUTILS_CANOPENNODE)
 
-INCLUDE_DIRS = \
-	-I$(DRV_SRC) \
-	-I$(CANOPEN_SRC) \
-	-I$(APPL_SRC)
+# CANopenNode tools
 
+ifeq ($(CONFIG_CANUTILS_CANOPENNODE_TOOLS_CANOPEND),y)
+PROGNAME   = canopend
+PRIORITY   = $(CONFIG_CANUTILS_CANOPENNODE_TOOLS_CANOPEND_PRIORITY)
+STACKSIZE  = $(CONFIG_CANUTILS_CANOPENNODE_TOOLS_CANOPEND_STACKSIZE)
+MAINSRC    = CO_main_basic.c
+endif
 
-SOURCES = \
-	$(DRV_SRC)/CO_driver.c \
-	$(DRV_SRC)/CO_error.c \
-	$(DRV_SRC)/CO_epoll_interface.c \
-	$(DRV_SRC)/CO_storageLinux.c \
-	$(CANOPEN_SRC)/301/CO_ODinterface.c \
-	$(CANOPEN_SRC)/301/CO_NMT_Heartbeat.c \
-	$(CANOPEN_SRC)/301/CO_HBconsumer.c \
-	$(CANOPEN_SRC)/301/CO_Emergency.c \
-	$(CANOPEN_SRC)/301/CO_SDOserver.c \
-	$(CANOPEN_SRC)/301/CO_SDOclient.c \
-	$(CANOPEN_SRC)/301/CO_TIME.c \
-	$(CANOPEN_SRC)/301/CO_SYNC.c \
-	$(CANOPEN_SRC)/301/CO_PDO.c \
-	$(CANOPEN_SRC)/301/crc16-ccitt.c \
-	$(CANOPEN_SRC)/301/CO_fifo.c \
-	$(CANOPEN_SRC)/303/CO_LEDs.c \
-	$(CANOPEN_SRC)/304/CO_GFC.c \
-	$(CANOPEN_SRC)/304/CO_SRDO.c \
-	$(CANOPEN_SRC)/305/CO_LSSslave.c \
-	$(CANOPEN_SRC)/305/CO_LSSmaster.c \
-	$(CANOPEN_SRC)/309/CO_gateway_ascii.c \
-	$(CANOPEN_SRC)/storage/CO_storage.c \
-	$(CANOPEN_SRC)/extra/CO_trace.c \
-	$(CANOPEN_SRC)/CANopen.c \
-	$(APPL_SRC)/OD.c \
-	$(DRV_SRC)/CO_main_basic.c
+ifeq ($(CONFIG_CANUTILS_CANOPENNODE_TOOLS_COCOMM),y)
+PROGNAME  += cocomm
+PRIORITY  += $(CONFIG_CANUTILS_CANOPENNODE_TOOLS_COCOMM_PRIORITY)
+STACKSIZE += $(CONFIG_CANUTILS_CANOPENNODE_TOOLS_COCOMM_STACKSIZE)
+MAINSRC   += cocomm/cocomm.c
+endif
 
-
-OBJS = $(SOURCES:%.c=%.o)
-CC ?= gcc
-OPT =
-OPT += -g
-#OPT += -O2
-OPT += -DCO_SINGLE_THREAD
-#OPT += -DCO_CONFIG_DEBUG=0xFFFF
-#OPT += -Wextra -Wshadow -pedantic -fanalyzer
-#OPT += -DCO_USE_GLOBALS
-#OPT += -DCO_MULTIPLE_OD
-CFLAGS = -Wall $(OPT) $(INCLUDE_DIRS)
-LDFLAGS =
-LDFLAGS += -g
-#LDFLAGS += -pthread
-
-#Options can be also passed via make: 'make OPT="-g" LDFLAGS="-pthread"'
-
-
-.PHONY: all clean
-
-all: clean $(LINK_TARGET)
-
-clean:
-	rm -f $(OBJS) $(LINK_TARGET)
-
-install:
-	cp $(LINK_TARGET) /usr/bin/$(LINK_TARGET)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(LINK_TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@
+include $(APPDIR)/Application.mk

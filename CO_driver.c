@@ -29,16 +29,24 @@
 #include <unistd.h>
 #include <errno.h>
 #include <syslog.h>
-#include <linux/can/raw.h>
-#include <linux/can/error.h>
-#include <linux/net_tstamp.h>
+#include <nuttx/can/can.h>
+#include <netpacket/can.h>
 #include <sys/socket.h>
-#include <asm/socket.h>
 #include <sys/eventfd.h>
-#include <time.h>
+#include <sys/time.h>
 
 #include "301/CO_driver.h"
 #include "CO_error.h"
+
+/* for hardware timestamps - since Linux 2.6.30 */
+#ifndef SO_TIMESTAMPING
+#define SO_TIMESTAMPING 37
+#endif
+
+/* from #include <linux/net_tstamp.h> - since Linux 2.6.30 */
+#define SOF_TIMESTAMPING_SOFTWARE (1<<4)
+#define SOF_TIMESTAMPING_RX_SOFTWARE (1<<3)
+#define SOF_TIMESTAMPING_RAW_HARDWARE (1<<6)
 
 #ifndef CO_SINGLE_THREAD
 pthread_mutex_t CO_EMCY_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -311,23 +319,24 @@ CO_ReturnError_t CO_CANmodule_addInterface(CO_CANmodule_t *CANmodule,
         return CO_ERROR_SYSCALL;
     }
 
-    /* enable socket rx queue overflow detection */
-    tmp = 1;
-    ret = setsockopt(interface->fd, SOL_SOCKET, SO_RXQ_OVFL, &tmp, sizeof(tmp));
-    if(ret < 0){
-        log_printf(LOG_DEBUG, DBG_ERRNO, "setsockopt(ovfl)");
-        return CO_ERROR_SYSCALL;
-    }
+    /* Unsupported by NuttX */
+    // /* enable socket rx queue overflow detection */
+    // tmp = 1;
+    // ret = setsockopt(interface->fd, SOL_SOCKET, SO_RXQ_OVFL, &tmp, sizeof(tmp));
+    // if(ret < 0){
+    //     log_printf(LOG_DEBUG, DBG_ERRNO, "setsockopt(ovfl)");
+    //     return CO_ERROR_SYSCALL;
+    // }
 
-    /* enable software time stamp mode (hardware timestamps do not work properly
-     * on all devices)*/
-    tmp = (SOF_TIMESTAMPING_SOFTWARE |
-           SOF_TIMESTAMPING_RX_SOFTWARE);
-    ret = setsockopt(interface->fd, SOL_SOCKET, SO_TIMESTAMPING, &tmp, sizeof(tmp));
-    if (ret < 0) {
-        log_printf(LOG_DEBUG, DBG_ERRNO, "setsockopt(timestamping)");
-        return CO_ERROR_SYSCALL;
-    }
+    // /* enable software time stamp mode (hardware timestamps do not work properly
+    //  * on all devices)*/
+    // tmp = (SOF_TIMESTAMPING_SOFTWARE |
+    //        SOF_TIMESTAMPING_RX_SOFTWARE);
+    // ret = setsockopt(interface->fd, SOL_SOCKET, SO_TIMESTAMPING, &tmp, sizeof(tmp));
+    // if (ret < 0) {
+    //     log_printf(LOG_DEBUG, DBG_ERRNO, "setsockopt(timestamping)");
+    //     return CO_ERROR_SYSCALL;
+    // }
 
     //todo - modify rx buffer size? first one needs root
     //ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, (void *)&bytes, sLen);

@@ -34,8 +34,6 @@
 #include <time.h>
 #include <sys/epoll.h>
 #include <net/if.h>
-#include <linux/reboot.h>
-#include <sys/reboot.h>
 
 #include "CANopen.h"
 #include "OD.h"
@@ -227,7 +225,7 @@ static bool_t LSScfgStoreCallback(void *object, uint8_t id, uint16_t bitRate) {
 /* Print usage */
 static void printUsage(char *progName) {
 printf(
-"Usage: %s <CAN device name> [options]\n", progName);
+"Usage: %s -d <CAN device name> [options]\n", progName);
 printf(
 "\n"
 "Options:\n"
@@ -333,8 +331,10 @@ int main (int argc, char *argv[]) {
         printUsage(argv[0]);
         exit(EXIT_SUCCESS);
     }
-    while((opt = getopt(argc, argv, "i:p:rc:T:s:")) != -1) {
+    while((opt = getopt(argc, argv, "d:i:p:rc:T:s:")) != -1) {
         switch (opt) {
+            case 'd': CANptr.can_ifindex = if_nametoindex(optarg);
+                break;
             case 'i': {
                 long int nodeIdLong = strtol(optarg, NULL, 0);
                 nodeIdFromArgs = (nodeIdLong < 0 || nodeIdLong > 0xFF)
@@ -399,11 +399,6 @@ int main (int argc, char *argv[]) {
                 printUsage(argv[0]);
                 exit(EXIT_FAILURE);
         }
-    }
-
-    if(optind < argc) {
-        CANdevice = argv[optind];
-        CANptr.can_ifindex = if_nametoindex(CANdevice);
     }
 
     /* Valid NodeId is 1..127 or 0xFF(unconfigured) in case of LSSslaveEnabled*/
@@ -801,13 +796,13 @@ int main (int argc, char *argv[]) {
     log_printf(LOG_INFO, DBG_CAN_OPEN_INFO, CO_activeNodeId, "finished");
 
     /* Flush all buffers (and reboot) */
-    if(rebootEnable && reset == CO_RESET_APP) {
-        sync();
-        if(reboot(LINUX_REBOOT_CMD_RESTART) != 0) {
-            log_printf(LOG_CRIT, DBG_ERRNO, "reboot()");
-            exit(EXIT_FAILURE);
-        }
-    }
+    // if(rebootEnable && reset == CO_RESET_APP) {
+    //     sync();
+    //     if(reboot(LINUX_REBOOT_CMD_RESTART) != 0) {
+    //         log_printf(LOG_CRIT, DBG_ERRNO, "reboot()");
+    //         exit(EXIT_FAILURE);
+    //     }
+    // }
 
     exit(programExit);
 }

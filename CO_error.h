@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <string.h>
-#include <linux/can.h>
+#include <nuttx/can.h>
 #include <net/if.h>
 
 #if __has_include("CO_error_custom.h")

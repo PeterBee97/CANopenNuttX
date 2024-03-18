@@ -1,0 +1,49 @@
+menuconfig CANUTILS_CANOPENNODE
+	bool "CANopenNode support"
+	default n
+	---help---
+		Enable the CANopenNode build
+
+if CANUTILS_CANOPENNODE
+
+menu "CANopenNode tools"
+
+config CANUTILS_CANOPENNODE_TOOLS_CANOPEND
+	bool "canopend"
+	depends on SERIAL_TERMIOS
+	depends on SYSTEM_READLINE
+	default n
+
+if CANUTILS_CANOPENNODE_TOOLS_CANOPEND
+
+config CANUTILS_CANOPENNODE_TOOLS_CANOPEND_PRIORITY
+	int "canopend task priority"
+	default 100
+
+config CANUTILS_CANOPENNODE_TOOLS_CANOPEND_STACKSIZE
+	int "canopend stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif #CANUTILS_CANOPENNODE_TOOLS_CANOPEND
+
+config CANUTILS_CANOPENNODE_TOOLS_COCOMM
+	bool "cocomm"
+	depends on SERIAL_TERMIOS
+	depends on SYSTEM_READLINE
+	default n
+
+if CANUTILS_CANOPENNODE_TOOLS_COCOMM
+
+config CANUTILS_CANOPENNODE_TOOLS_COCOMM_PRIORITY
+	int "cocomm task priority"
+	default 100
+
+config CANUTILS_CANOPENNODE_TOOLS_COCOMM_STACKSIZE
+	int "cocomm stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif #CANUTILS_CANOPENNODE_TOOLS_COCOMM
+
+endmenu # "CANopenNode tools"
+
+endif # CANUTILS_CANOPENNODE
